@@ -1,5 +1,5 @@
 #include "menu.h"
-#include "math.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -68,6 +68,7 @@ void get_th_task(void *args)
             // 标记温湿度有新数值
 
             // th_update_flag = 1;
+            ESP_LOGI(TAG, "TEMP:%d HUMI:%d", temp_value, humi_value);
         }
         if (icon_flag == 0)
         {

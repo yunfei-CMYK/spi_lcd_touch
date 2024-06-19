@@ -3,11 +3,13 @@
 #include "lvgl.h"
 #include "../managed_components/lvgl__lvgl/src/core/lv_event.h"
 #include "gxhtc3.h"
+#include "math.h"
 
 #define MENUWORK BIT1
 
 extern float temp;
 extern float humi;
+extern int temp_value, humi_value;
 
 void get_th_task(void *args);
 

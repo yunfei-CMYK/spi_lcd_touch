@@ -40,6 +40,10 @@
 static const char *TAG = "example";
 
 EventGroupHandle_t my_event_group;
+
+#define CONFIG_EXAMPLE_LCD_TOUCH_ENABLED 1
+#define CONFIG_EXAMPLE_LCD_CONTROLLER_ST7789 1
+
 #define MENUWORK BIT1
 
 // Using SPI2 in the example
@@ -84,7 +88,6 @@ EventGroupHandle_t my_event_group;
 #define EXAMPLE_LVGL_TASK_MIN_DELAY_MS 1
 #define EXAMPLE_LVGL_TASK_STACK_SIZE (4 * 1024)
 #define EXAMPLE_LVGL_TASK_PRIORITY 2
-
 
 #if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
 esp_lcd_touch_handle_t tp = NULL;
@@ -162,6 +165,8 @@ static void example_lvgl_port_update_callback(lv_disp_drv_t *drv)
     }
 }
 
+int strength = 0;
+
 #if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
 static void example_lvgl_touch_cb(lv_indev_drv_t *drv, lv_indev_data_t *data)
 {
@@ -175,15 +180,15 @@ static void example_lvgl_touch_cb(lv_indev_drv_t *drv, lv_indev_data_t *data)
     /* Get coordinates */
     bool touchpad_pressed = esp_lcd_touch_get_coordinates(drv->user_data, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 1);
 
-    if (touchpad_pressed && touchpad_cnt > 0)
-    {
+    if (touchpad_pressed && touchpad_cnt > 0) {
         data->point.x = touchpad_x[0];
         data->point.y = touchpad_y[0];
         data->state = LV_INDEV_STATE_PRESSED;
-    }
-    else
-    {
+        strength++;
+        printf("x = %d y = %d strength = %d\n", data->point.x, data->point.y, strength);
+    } else {
         data->state = LV_INDEV_STATE_RELEASED;
+        strength = 0;
     }
 }
 #endif
@@ -296,7 +301,9 @@ void app_main(void)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     ESP_LOGI(TAG, "GXHTC3 OK");
-
+    gxhtc3_get_tah();
+    temp_value = round(temp);
+    humi_value = round(humi);
     // Initialize LVGL
     static lv_disp_draw_buf_t disp_buf; // contains internal graphic buffer(s) called draw buffer(s)
     static lv_disp_drv_t disp_drv;      // contains callback functions
