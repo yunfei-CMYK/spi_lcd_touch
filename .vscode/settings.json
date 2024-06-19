@@ -1,0 +1,20 @@
+{
+    "idf.portWin": "COM6",
+    "idf.adapterTargetName": "esp32c3",
+    "idf.openOcdConfigs": [
+        "board/esp32c3-bridge.cfg"
+    ],
+    "idf.flashType": "UART",
+    "files.associations": {
+        "myi2c.h": "c",
+        "esp_lcd_panel_vendor.h": "c"
+    },
+    "workbench.colorCustomizations": {
+        "tab.activeBackground": "#1a1a1b",
+        "activityBar.background": "#1a1a1b",
+        "sideBar.background": "#1a1a1b",
+        "tab.activeBorder": "#1a1a1b",
+        "editor.background": "#1b1a1a",
+        "terminal.background": "#1a1a1b"
+    }
+}
