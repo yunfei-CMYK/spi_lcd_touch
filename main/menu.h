@@ -10,8 +10,10 @@
 extern float temp;
 extern float humi;
 extern int temp_value, humi_value;
+extern int icon_flag;
+extern lv_obj_t *start_src;
 
-void get_th_task(void *args);
+extern void get_th_task(void *args);
 
 void lv_gui_start(void);
 

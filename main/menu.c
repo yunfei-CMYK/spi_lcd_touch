@@ -1,90 +1,47 @@
 #include "menu.h"
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
 
 static const char *TAG = "example";
-extern lv_obj_t *start_src;
+
+/********************************返回按钮回调函数***************************/
 lv_obj_t *submenu;
 lv_timer_t *my_lv_timer;
 int icon_flag;
 
-/********************************返回按钮回调函数***************************/
-void back_to_main_menu(lv_event_t *e)
+static void my_gesture_event_cb(lv_event_t *e)
 {
-    // lv_obj_t *submenu = lv_event_get_user_data(e);
-    // // delete the submenu
-    // lv_obj_del(submenu);
-
-    if (icon_flag == 1)
+    lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
+    if (dir == LV_DIR_TOP)
     {
-        lv_timer_del(my_lv_timer);
+        if ((icon_flag == 1) || (icon_flag == 2) || (icon_flag == 4) || (icon_flag == 5))
+        {
+            lv_timer_del(my_lv_timer);
+        }
+        lv_obj_del(submenu);
+        icon_flag = 0;
     }
-    lv_obj_del(submenu);
 }
+
 
 /*********************************温湿度显示******************************/
 
-lv_obj_t *temp_meter;
-lv_obj_t *humi_meter;
+// lv_obj_t *temp_meter;
+// lv_obj_t *humi_meter;
 lv_obj_t *temp_label;
 lv_obj_t *humi_label;
-lv_meter_indicator_t *temp_indic;
-lv_meter_indicator_t *humi_indic;
+// lv_meter_indicator_t *temp_indic;
+// lv_meter_indicator_t *humi_indic;
 int temp_value, humi_value; // 室内实时温湿度值
-
-void get_th_task(void *args)
-{
-    esp_err_t ret;
-    int time_cnt = 0, date_cnt = 0;
-    float temp_sum = 0.0, humi_sum = 0.0;
-
-    while (1)
-    {
-        ret = gxhtc3_get_tah(); // 获取一次温湿度
-        if (ret != ESP_OK)
-        {
-            ESP_LOGE(TAG, "GXHTC3 READ TAH ERROR.");
-        }
-        else
-        {                               // 如果成功获取数据
-            temp_sum = temp_sum + temp; // 温度累计和
-            humi_sum = humi_sum + humi; // 湿度累计和
-            date_cnt++;                 // 记录累计次数
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS); // 延时100毫秒
-        time_cnt++;                           // 每100毫秒+1
-        if (time_cnt > 10)                    // 1秒钟到
-        {
-            // 取平均数 且把结果四舍五入为整数
-            temp_value = round(temp_sum / date_cnt);
-            humi_value = round(humi_sum / date_cnt);
-            // 各标志位清零
-            time_cnt = 0;
-            date_cnt = 0;
-            temp_sum = 0;
-            humi_sum = 0;
-            // 标记温湿度有新数值
-
-            // th_update_flag = 1;
-            ESP_LOGI(TAG, "TEMP:%d HUMI:%d", temp_value, humi_value);
-        }
-        if (icon_flag == 0)
-        {
-            break;
-        }
-    }
-    vTaskDelete(NULL);
-}
 
 // 定时更新温湿度值
 void thv_update_cb(lv_timer_t *timer)
 {
-    lv_meter_set_indicator_end_value(temp_meter, temp_indic, temp_value);
-    lv_meter_set_indicator_end_value(humi_meter, humi_indic, humi_value);
-    lv_label_set_text_fmt(temp_label, "%d℃", temp_value);
-    lv_label_set_text_fmt(humi_label, "%d%%", humi_value);
+    // lv_meter_set_indicator_end_value(temp_meter, temp_indic, temp_value);
+    // lv_meter_set_indicator_end_value(humi_meter, humi_indic, humi_value);
+    lv_label_set_text_fmt(temp_label, "Temperature: %d°C", temp_value);
+    lv_label_set_text_fmt(humi_label, "Humidity: %d%%", humi_value);
 }
 void setting_menu(void)
 {
@@ -92,30 +49,32 @@ void setting_menu(void)
     static lv_style_t style_setting_menu;
     lv_style_init(&style_setting_menu);
     lv_style_set_bg_color(&style_setting_menu, lv_color_hex(0x003a57));
+    lv_style_set_width(&style_setting_menu, 320);
+    lv_style_set_height(&style_setting_menu, 240);
 
     static lv_style_t style_font;
     lv_style_init(&style_font);
     lv_style_set_text_color(&style_font, lv_color_hex(0xFFFFFF));
 
-    submenu = lv_obj_create(lv_scr_act());
-    lv_obj_set_size(submenu, 320, 240);
-    lv_obj_align(submenu, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_add_style(submenu, &style_setting_menu, 0);
-
     gxhtc3_get_tah();
     temp_value = round(temp);
     humi_value = round(humi);
+
+    submenu = lv_obj_create(lv_scr_act());
+    lv_obj_align(submenu, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_style(submenu, &style_setting_menu, 0);
+
     // 创建温度显示标签
-    lv_obj_t *temp_number = lv_label_create(submenu);
-    lv_obj_add_style(temp_number, &style_font, 0);
-    lv_label_set_text_fmt(temp_number, "Temperature: %d°C", temp_value);
-    lv_obj_align(temp_number, LV_ALIGN_TOP_MID, 0, 20); // 例如，放在顶部中间
+    temp_label = lv_label_create(submenu);
+    lv_obj_add_style(temp_label, &style_font, 0);
+    lv_label_set_text_fmt(temp_label, "Temperature: %d°C", temp_value);
+    lv_obj_align(temp_label, LV_ALIGN_TOP_MID, 0, 20); // 例如，放在顶部中间
 
     // 创建湿度显示标签
-    lv_obj_t *humi_number = lv_label_create(submenu);
-    lv_obj_add_style(humi_number, &style_font, 0);
-    lv_label_set_text_fmt(humi_number, "Humidity: %d%%", humi_value);
-    lv_obj_align(humi_number, LV_ALIGN_TOP_MID, 0, 50); // 稍微往下一点放置
+    humi_label = lv_label_create(submenu);
+    lv_obj_add_style(humi_label, &style_font, 0);
+    lv_label_set_text_fmt(humi_label, "Humidity: %d%%", humi_value);
+    lv_obj_align(humi_label, LV_ALIGN_TOP_MID, 0, 50); // 稍微往下一点放置
 
     icon_flag = 1; // 标记已经进入第一个应用
     xTaskCreate(get_th_task, "get_th_task", 4096, NULL, 5, NULL);
@@ -131,7 +90,10 @@ void setting_menu(void)
     lv_obj_center(back_label);
 
     // 为返回按钮注册事件处理器
-    lv_obj_add_event_cb(back_btn, back_to_main_menu, LV_EVENT_CLICKED, submenu);
+    // lv_obj_add_event_cb(back_btn, back_to_main_menu, LV_EVENT_CLICKED, submenu);
+    lv_obj_add_event_cb(submenu, my_gesture_event_cb, LV_EVENT_GESTURE, NULL);
+    lv_obj_clear_flag(submenu, LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_add_flag(submenu, LV_OBJ_FLAG_CLICKABLE);
 }
 
 static lv_obj_t *label;
@@ -184,7 +146,10 @@ void system_menu(void)
     lv_obj_center(back_label);
 
     // 为返回按钮注册事件处理器
-    lv_obj_add_event_cb(back_btn, back_to_main_menu, LV_EVENT_CLICKED, submenu);
+    // lv_obj_add_event_cb(back_btn, back_to_main_menu, LV_EVENT_CLICKED, submenu);
+    lv_obj_add_event_cb(submenu, my_gesture_event_cb, LV_EVENT_GESTURE, NULL);
+    lv_obj_clear_flag(submenu, LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_add_flag(submenu, LV_OBJ_FLAG_CLICKABLE);
 }
 
 void menu_event_handler(lv_event_t *e)
