@@ -7,7 +7,10 @@
     "idf.flashType": "UART",
     "files.associations": {
         "myi2c.h": "c",
-        "esp_lcd_panel_vendor.h": "c"
+        "esp_lcd_panel_vendor.h": "c",
+        "semphr.h": "c",
+        "freertos.h": "c",
+        "task.h": "c"
     },
     "workbench.colorCustomizations": {
         "tab.activeBackground": "#1a1a1b",

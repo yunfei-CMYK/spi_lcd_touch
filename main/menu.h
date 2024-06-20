@@ -7,6 +7,7 @@
 
 #define MENUWORK BIT1
 
+extern int strength;
 extern float temp;
 extern float humi;
 extern int temp_value, humi_value;
@@ -19,7 +20,9 @@ void lv_gui_start(void);
 
 void startbtn_event_cb(lv_event_t *e);
 
-void back_to_main_menu(lv_event_t *e);
+void thv_update_cb(lv_timer_t *timer);
+
+void slider_event_cb(lv_event_t *e);
 
 void menu_event_handler(lv_event_t *e);
 

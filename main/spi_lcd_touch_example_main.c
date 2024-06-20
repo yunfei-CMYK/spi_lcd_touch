@@ -198,44 +198,7 @@ static void example_increase_lvgl_tick(void *arg)
     /* Tell LVGL how many milliseconds has elapsed */
     lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
 }
-
-// bool example_lvgl_lock(int timeout_ms)
-// {
-//     // Convert timeout in milliseconds to FreeRTOS ticks
-//     // If `timeout_ms` is set to -1, the program will block until the condition is met
-//     const TickType_t timeout_ticks = (timeout_ms == -1) ? portMAX_DELAY : pdMS_TO_TICKS(timeout_ms);
-//     return xSemaphoreTakeRecursive(lvgl_mux, timeout_ticks) == pdTRUE;
-// }
-
-// void example_lvgl_unlock(void)
-// {
-//     xSemaphoreGiveRecursive(lvgl_mux);
-// }
-
-// static void example_lvgl_port_task(void *arg)
-// {
-//     ESP_LOGI(TAG, "Starting LVGL task");
-//     uint32_t task_delay_ms = EXAMPLE_LVGL_TASK_MAX_DELAY_MS;
-//     while (1)
-//     {
-//         // Lock the mutex due to the LVGL APIs are not thread-safe
-//         if (example_lvgl_lock(-1))
-//         {
-//             task_delay_ms = lv_timer_handler();
-//             // Release the mutex
-//             example_lvgl_unlock();
-//         }
-//         if (task_delay_ms > EXAMPLE_LVGL_TASK_MAX_DELAY_MS)
-//         {
-//             task_delay_ms = EXAMPLE_LVGL_TASK_MAX_DELAY_MS;
-//         }
-//         else if (task_delay_ms < EXAMPLE_LVGL_TASK_MIN_DELAY_MS)
-//         {
-//             task_delay_ms = EXAMPLE_LVGL_TASK_MIN_DELAY_MS;
-//         }
-//         vTaskDelay(pdMS_TO_TICKS(task_delay_ms));
-//     }
-// }
+ 
 void get_th_task(void *args)
 {
     esp_err_t ret;
